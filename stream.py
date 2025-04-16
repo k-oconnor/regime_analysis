@@ -65,6 +65,37 @@ ax.set_ylabel("RAI")
 ax.set_title("RAI vs IDEO (color = HDR, size = PBR)")
 st.pyplot(fig)
 
+# --- CHAT INTERFACE ---
+st.header("💬 Chat with the Regime Analyzer")
+from openai import OpenAI
+client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+
+if "chat_history" not in st.session_state:
+    st.session_state.chat_history = [
+        {"role": "system", "content": "You are a neutral expert in political regime analysis. Respond with insight, avoid bias, and support users building regime profiles using the following metrics: RAI, IDEO, HDR, PBR, and Estimated Deaths."}
+    ]
+
+for msg in st.session_state.chat_history[1:]:
+    with st.chat_message(msg["role"]):
+        st.markdown(msg["content"])
+
+user_input = st.chat_input("Ask about a regime or propose one")
+if user_input:
+    st.session_state.chat_history.append({"role": "user", "content": user_input})
+    with st.chat_message("user"):
+        st.markdown(user_input)
+
+    with st.chat_message("assistant"):
+        with st.spinner("Thinking..."):
+            response = client.chat.completions.create(
+                model="gpt-4",
+                messages=st.session_state.chat_history
+            )
+            reply = response.choices[0].message.content
+            st.markdown(reply)
+            st.session_state.chat_history.append({"role": "assistant", "content": reply})
+
+
 # --- GPT REGIME ASSISTANT ---
 st.sidebar.header("🧠 GPT Regime Assistant")
 openai.api_key = st.secrets.get("OPENAI_API_KEY", "")

@@ -103,12 +103,11 @@ After listing the values and tagline, include a short rationale that justifies y
 
     with st.spinner("Analyzing with GPT..."):
         try:
-            response = openai.ChatCompletion.create(
-                model="gpt-4",
-                messages=[{"role": "user", "content": prompt}]
-            )
-            result = response['choices'][0]['message']['content']
-            st.sidebar.markdown(result)
+            client = openai.OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+            response = client.chat.completions.create(
+            model="gpt-4",
+            messages=[{"role": "user", "content": prompt}])
+            result = response.choices[0].message.content
 
             if st.sidebar.button("➕ Add Regime to Table"):
                 import re
